@@ -1,31 +1,137 @@
-# Mutation Testing
+# Mutation testing
 
-Mutation testing is a way to make your automated tests more reliable. You make small changes to your code (mutants) and if your automated tests fail as a result, then that's a mutant kill. If your tests pass, that's a mutant escape. 
+Org hub for [quality-gates](https://github.com/quality-gates) mutation tools.
 
-The general idea is that a mutant escape is bad, because your tests didn't notice that a line of your code change. Now, not all mutants are equal in value. If you change the output of a console log, then you could argue your tests don't really need to detect that. If a user wouldn't see critical behaviour fail or change as a result of that mutated bit of code, then that's an equivalent mutant. 
+Mutation testing changes production source in small ways and re-runs the suite.
+If tests fail, the mutant is **killed**. If tests still pass, the mutant
+**escaped**. An escape is a gap: that shape of bug would ship.
 
-But the important bit here isn't terminology. The important bit is **code changed -> automated tests caught it by failing** and you can make your own judgement on what specific types of code change you value most. 
+You need mutation testing to avoid **AI test slop**. Models write passing tests
+that look complete under coverage and review. Mutation testing asks the harder
+question: if the code were wrong, would the tests fail?
 
-Language specific tools essentially build up a big tree of your code and use that to rattle through a great big list of code mutations to try, automatically running your test suite as it goes. It's often slow and intensive but it's extremely valuable in finding testing gaps or even bugs. 
+## Why you need it
 
-## Automated Tools
+You need mutation testing to avoid AI test slop. Line coverage only proves
+code ran. It does not prove the assertions would catch a fault.
 
-Many tools exist for this, and I should plug my own tools here - [mutago](https://github.com/quality-gates/mutago) in particular for Go is the most feature-complete tool even if it's not the most well known, with Go-specific idioms that other mutations testing tools miss.It is also the only mutation tester for Go that includes git-diff-aware mutations and tracks the covered-MSI % metric. It's the perfect regression guard to put into your CI pipeline if you run a Go codebase.  
+AI-assisted suites write passing tests that still miss faults. They often:
 
-These automated mutation testing tools expose testing gaps very quickly and in my opinion are the strongest line of defence against AI slop. Claude and other models will write passing tests, but you can never guarantee they'll write effective tests without proper prompting. Even then, I've found, AI-written tests are often tautological, relying on mocks and fakes. They often _can't fail_ and that makes them useless as regression guards. 
+- assert existence instead of values
+- pin happy paths and skip boundaries
+- mock so heavily that production behaviour cannot fail the test
+- pass on every run because they cannot fail
 
-Automated mutation testing tools identify test slop with brutal efficiency. They expose which of your tests are actually pulling their weight, no matter what kind of code coverage you have. You could be executing 100% of your code in your tests, but an automated mutation testing tool could show that your tests aren't covering some critical input classes that could actually happen with your application code in prod. 
+Mutation testing exposes those gaps with brutal efficiency. A high kill rate
+is a regression guard. A pile of escapes is a map of tests that do not pull
+their weight — including tests an agent just added.
 
-If you maintain a codebase in any of the major languages, you really can't afford to miss out on mutation testing, especially not in 2026 when nearly ever software developer uses Claude Code or an equivalent. 
+Prefer **covered-MSI** (score on lines the suite actually executes) when the
+tool supports it. Raw MSI drops when you add untested code; covered-MSI stays
+flat until existing tests get weaker.
 
-## Manual Mutation Testing
+## Pain points it hits
 
-But let's step back for a second. Mutation testing doesn't have to be automated. Sometimes your code repo is in a collection of different languages, or you need to run mutation testing at a higher level. You need to see, for example, if mutating a Dockerfile line is detected by your automated tests. And those automated tests could literally be, up Dockerfile as a container and run smoke tests on it. 
+| Pain | What mutation testing does |
+| :--- | :--- |
+| AI writes green tests that never fail | Escapes show assertions that do not constrain behaviour |
+| 100% coverage, weak confidence | Coverage counts execution; mutants count detection |
+| Review cannot read every test | Scores and escape diffs scale past human attention |
+| CI only runs unit tests | Score floors (`--min-msi`, `--min-covered-msi`) fail the job |
+| Legacy suite full of known holes | Baseline / accepted survivors: fail only on **new** escapes |
+| PR noise and long runtimes | Diff-aware mutation limits work to changed lines |
+| Polyglot or infra outside one language tool | Manual mutation still applies (see below) |
 
-Mutation testing requires code to mutate, a build process, and automated tests that can pass or fail. That's it. Conceptually it's something you can do without an automated mutation testing tool. 
+## Language map
 
-Ideally, you get an AI model to do it for you, but carefully prod the model to ensure its list of mutants is complete and somewhat deterministic. Document the test, the results, and use it in successive runs if you want to be thorough. 
+Quality-gates ships language-native CLIs. Start with the row for your stack.
 
-## So What? 
+| Language | Tool | Role | Repo |
+| :--- | :--- | :--- | :--- |
+| Go | **mutago** | Full CLI: coverage-aware MSI, git-diff filter, baseline, CI loggers, Go-idiom mutators | [quality-gates/mutago](https://github.com/quality-gates/mutago) |
+| Rust | **mutarust** | Cargo-native mutation runner with score gates, coverage mode, baselines, CI loggers | [quality-gates/mutarust](https://github.com/quality-gates/mutarust) |
+| Haskell | **mutaskell** | GHC-parser mutator with covered-MSI, project mode, and CI setups | [quality-gates/mutaskell](https://github.com/quality-gates/mutaskell) |
 
-AI slop is going to become more of a problem for people maintaining codebases. Mutation testing is a quality gate AND a tool to close out the blind spots in your tests. Automated tools give you a constant quality gate against sloppy code and tests, and manual mutation tests force you to think of _what_ you can mutate to represent genuine behavioural changes.  
+Site docs where published:
+
+- mutago — https://quality-gates.github.io/mutago/
+- mutaskell — https://quality-gates.github.io/mutaskell
+
+Other languages are not first-party here yet. Use a mature tool in that
+ecosystem, or run [manual mutation](#manual-mutation) until a quality-gates
+port exists.
+
+## Start here
+
+**Go**
+
+```console
+go install github.com/quality-gates/mutago/v2/cmd/mutago@latest
+mutago --coverage --min-msi 75 --min-covered-msi 80 ./...
+```
+
+**Rust**
+
+```console
+cargo install mutarust
+mutarust --coverage --min-msi 75 --min-covered-msi 80 .
+```
+
+**Haskell**
+
+```console
+cabal build --write-ghc-environment-files=always all
+cabal run mutaskell -- --min-covered-msi 70 src/YourModule.hs
+```
+
+Raise floors only when the suite can hold them. On a brownfield tree, record a
+baseline of current escapes first, then fail only on new ones (see each tool’s
+README for `--baseline` / config equivalents).
+
+## Manual mutation
+
+Automation needs a parser and a fast suite. You still need the *idea* when:
+
+- the change lives outside app source (Dockerfile, Terraform, CI YAML, SQL)
+- the repo mixes languages one tool does not own
+- the valuable check is an end-to-end or container smoke path
+
+Minimum loop:
+
+1. Name one behaviour users would notice if it broke.
+2. Change one line that should break that behaviour.
+3. Run the automated checks that should catch it.
+4. Record kill or escape. Restore the line.
+5. Keep a short, repeatable list so successive runs stay comparable.
+
+Agents can propose mutants; humans still own the list, the oracle, and the
+pass/fail record. Manual mutation does not replace a language CLI in CI. It
+extends the same pressure to layers tools do not reach.
+
+## Related quality gates
+
+Mutation testing asks whether tests detect faults. The **mess\*** family asks
+whether the source stays maintainable before faults hide in mess:
+
+| Language | Mess detector |
+| :--- | :--- |
+| Python | [messpy](https://github.com/quality-gates/messpy) |
+| Rust | [messrust](https://github.com/quality-gates/messrust) |
+| Go | [messgo](https://github.com/quality-gates/messgo) |
+| JavaScript / TypeScript | [messcript](https://github.com/quality-gates/messcript) |
+| C# | [messharp](https://github.com/quality-gates/messharp) |
+| F# | [messfsharp](https://github.com/quality-gates/messfsharp) |
+
+Use both: mess detectors on every change; mutation scores on a cadence or on
+touched packages when runtime allows.
+
+## Maintainers
+
+This repository is documentation only: the org map and pitch for mutation
+testing. Product code and releases live in the language tool repos above.
+
+Hub contract tests:
+
+```console
+python3 tests/hub_contract_test.py
+```
