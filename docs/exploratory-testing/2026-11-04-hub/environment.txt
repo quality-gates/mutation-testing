@@ -1,0 +1,4 @@
+cleanup=/home/ubuntu/Code/pstack/quality-gates/mutation-testing-explore-20261104/.scratch/cleanup.sh
+worktree=/home/ubuntu/Code/pstack/quality-gates/mutation-testing-explore-20261104
+base=04d5544d6de6ee027cb873bb9945ae19ae855434
+resources=none (foreground commands only)

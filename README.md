@@ -130,6 +130,8 @@ touched packages when runtime allows.
 This repository is documentation only: the org map and pitch for mutation
 testing. Product code and releases live in the language tool repos above.
 
+Exploratory feedback: [2026-11-04 hub pass](docs/exploratory-testing/2026-11-04-hub.md).
+
 Hub contract tests:
 
 ```console

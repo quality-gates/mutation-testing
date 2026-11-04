@@ -1,0 +1,19 @@
+$ sha256sum src/lib.rs before
+30b08b603aa824f5f9da911c85e4890feb1fe1db3da97a40afe89b39a5117bd8  src/lib.rs
+$ mutarust --min-msi 75 .
+killed src/lib.rs arithmetic/base
+  ID: 7622b7566b489da148e83130980d4fb1
+  Blacklist checksum: 8a790361770f02769aefa9b6eb2620be
+Killed: 1
+Escaped: 0
+Errored: 0
+Not covered: 0
+Skipped: 0
+Total: 1
+Mutation score: 100.00%
+Per-mutator results:
+Mutator | Killed | Escaped | Skipped | Total
+arithmetic/base | 1 | 0 | 0 | 1
+exit=0
+$ sha256sum src/lib.rs after
+30b08b603aa824f5f9da911c85e4890feb1fe1db3da97a40afe89b39a5117bd8  src/lib.rs
