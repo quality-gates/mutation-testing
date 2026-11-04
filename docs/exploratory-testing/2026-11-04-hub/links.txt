@@ -1,0 +1,10 @@
+attempt=1 status=200 bytes=629198 url=https://github.com/quality-gates/mutago final=https://github.com/quality-gates/mutago
+attempt=1 status=200 bytes=280277 url=https://github.com/quality-gates/mutarust final=https://github.com/quality-gates/mutarust
+attempt=1 status=200 bytes=492262 url=https://github.com/quality-gates/mutaskell final=https://github.com/quality-gates/mutaskell
+attempt=1 status=200 bytes=23454 url=https://quality-gates.github.io/mutago/ final=https://quality-gates.github.io/mutago/
+attempt=1 status=200 bytes=5052 url=https://quality-gates.github.io/mutaskell final=https://quality-gates.github.io/mutaskell/
+attempt=2 status=200 bytes=629202 url=https://github.com/quality-gates/mutago final=https://github.com/quality-gates/mutago
+attempt=2 status=200 bytes=280278 url=https://github.com/quality-gates/mutarust final=https://github.com/quality-gates/mutarust
+attempt=2 status=200 bytes=492263 url=https://github.com/quality-gates/mutaskell final=https://github.com/quality-gates/mutaskell
+attempt=2 status=200 bytes=23454 url=https://quality-gates.github.io/mutago/ final=https://quality-gates.github.io/mutago/
+attempt=2 status=200 bytes=5052 url=https://quality-gates.github.io/mutaskell final=https://quality-gates.github.io/mutaskell/

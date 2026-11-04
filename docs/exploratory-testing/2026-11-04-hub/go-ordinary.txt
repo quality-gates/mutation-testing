@@ -1,0 +1,13 @@
+$ go test ./...
+ok  	example.com/exploratory	0.006s
+$ mutago --coverage --min-msi 75 --min-covered-msi 80 ./...
+KILLED add.go:3 (statement/return)
+------------------------------------------------------------------------------------------------------------------------------------------------------
+KILLED add.go:3 (arithmetic/base)
+------------------------------------------------------------------------------------------------------------------------------------------------------
+The mutation score is 100.00% (2 killed, 0 escaped, 0 errored, 0 not covered, 0 skipped, 2 total)
+The covered-code mutation score is 100.00%
+
+Per-mutator breakdown:
+  arithmetic/base                      killed   1 / 1    (100%)
+  statement/return                     killed   1 / 1    (100%)

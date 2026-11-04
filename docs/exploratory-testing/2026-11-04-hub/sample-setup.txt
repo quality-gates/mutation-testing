@@ -1,0 +1,44 @@
+Go sample
+
+File go.mod:
+module example.com/exploratory
+
+go 1.26
+
+File add.go:
+package sample
+
+func Add(a, b int) int { return a + b }
+
+Ordinary add_test.go:
+package sample
+
+import "testing"
+
+func TestAdd(t *testing.T) { if got := Add(2, 3); got != 5 { t.Fatalf("got %d", got) } }
+
+Weak-test variation add_test.go:
+package sample
+
+import "testing"
+
+func TestAdd(t *testing.T) { _ = Add(2, 3) }
+
+Rust sample
+
+File Cargo.toml:
+[package]
+name = "sample"
+version = "0.1.0"
+edition = "2021"
+
+File src/lib.rs:
+pub fn add(a: i32, b: i32) -> i32 { a + b }
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn add() { assert_eq!(super::add(2, 3), 5); }
+}
+
+Generate the sample lockfile with `cargo generate-lockfile --offline`, then run the commands in the linked logs. The replay used a fresh sample named `sample-replay` and the same function and assertion.
