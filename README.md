@@ -72,7 +72,12 @@ mutago --coverage --min-msi 75 --min-covered-msi 80 ./...
 
 **Rust**
 
+For this coverage gate, install Rust with [rustup](https://rustup.rs/), then
+install `llvm-tools-preview` and `cargo-llvm-cov`.
+
 ```console
+rustup component add llvm-tools-preview
+cargo install cargo-llvm-cov
 cargo install mutarust
 mutarust --coverage --min-msi 75 --min-covered-msi 80 .
 ```
